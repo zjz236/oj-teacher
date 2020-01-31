@@ -6,7 +6,7 @@ const ObjectID = require('mongodb').ObjectID
 
 // 解密，验证
 const verifyToken = token => {
-  const cert = fs.readFileSync(path.join(__dirname, '../public/cert/rsa_public_key.pem')) // 公钥，看后面生成方法
+  const cert = fs.readFileSync(path.join(__dirname, '../source/cert/rsa_public_key.pem')) // 公钥，看后面生成方法
   let res = ''
   try {
     const result = jwt.verify(token, cert, { algorithms: [ 'RS256' ] }) || {}

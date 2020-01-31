@@ -13,7 +13,7 @@ module.exports = app => {
     },
     loginToken(data, expires = 7200) {
       const exp = Math.floor(Date.now() / 1000) + expires
-      const cert = fs.readFileSync(path.join(__dirname, '../public/cert/rsa_private_key.pem')) // 私钥，看后面生成方法
+      const cert = fs.readFileSync(path.join(__dirname, '../source/cert/rsa_private_key.pem')) // 私钥，看后面生成方法
       return jwt.sign({ data, exp }, cert, { algorithm: 'RS256' })
     },
     readUsername(data) {

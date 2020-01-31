@@ -13,7 +13,3 @@ exports.helper = {
   enable: true,
   package: 'egg-helper'
 }
-exports.oss = {
-  enable: true,
-  package: 'egg-oss'
-}

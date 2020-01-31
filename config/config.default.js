@@ -64,15 +64,6 @@ module.exports = appInfo => {
       enable: false
     }
   }
-  config.oss = {
-    client: {
-      accessKeyId: 'LTAI4Fv3bTwUXbunuRRhvQt8',
-      accessKeySecret: 'y3c5hPxVrEEDv8XF2ci0XHozbNHIqU',
-      bucket: 'jiyang-oj',
-      endpoint: 'oss-cn-beijing.aliyuncs.com',
-      timeout: '60s'
-    }
-  }
   config.middleware = [ 'jwt' ]
   // jwt配置
   config.jwt = {
@@ -85,9 +76,9 @@ module.exports = appInfo => {
   // add your user config here
   const userConfig = {
     // myAppName: 'egg',
+    configUrl: 'http://127.0.0.1:7001/'
   }
 
-  config.url = 'http://127.0.0.1:7001/'
 
   return {
     ...config,

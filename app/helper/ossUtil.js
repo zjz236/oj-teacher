@@ -1,9 +1,8 @@
 'use strict'
 const fs = require('fs')
 const path = require('path')
-const url = 'http://127.0.0.1:7001/'
 
-module.exports = () => {
+module.exports = app => {
   return {
     putFile(fileName, filePath) {
       return new Promise((resolve, reject) => {
@@ -16,7 +15,7 @@ module.exports = () => {
           fs.writeFileSync(path.join(__dirname, '../public/' + fileName), data)
           resolve({
             name: fileName,
-            url: url + 'oj/getFile/' + fileName
+            url: app.config.configUrl + 'public/' + fileName
           })
         } catch (err) {
           reject(new Error(err))
