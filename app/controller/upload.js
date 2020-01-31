@@ -7,11 +7,14 @@ const path = require('path')
 class uploadController extends Controller {
   async uploadImg() {
     const { ctx } = this
+    const { putFile } = ctx.helper.ossUtil
     const file = ctx.request.files[0]
-    const name = 'images/' + path.basename(file.filename)
+    const name = 'img/' + path.basename(file.filename)
     let result
     try {
-      result = await ctx.oss.put(name, file.filepath)
+      result = await putFile(name, file.filepath)
+    } catch (e) {
+      console.error(e)
     } finally {
       ctx.cleanupRequestFiles()
     }

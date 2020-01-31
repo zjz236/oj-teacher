@@ -76,7 +76,7 @@ module.exports = appInfo => {
   config.middleware = [ 'jwt' ]
   // jwt配置
   config.jwt = {
-    ignore: [ '/oj/account/login', '/oj/download/:type/:filename', '/oj/upload' ]
+    ignore: [ '/oj/account/login', '/oj/download/:type/:filename', '/oj/upload', '/oj/getFile/:filename' ]
   }
   config.cors = {
     origin: '*',
@@ -86,6 +86,8 @@ module.exports = appInfo => {
   const userConfig = {
     // myAppName: 'egg',
   }
+
+  config.url = 'http://127.0.0.1:7001/'
 
   return {
     ...config,

@@ -15,6 +15,18 @@ class downloadController extends Controller {
     ctx.set('Content-type', 'application/' + fileType)
     ctx.body = fs.readFileSync(filePath)
   }
+
+  async getFile() {
+    const { ctx } = this
+    const { filepath, filename } = ctx.params
+    const filePath = path.join(__dirname, `../public/${filepath}/${filename}`)
+    if (!fs.existsSync(filePath)) return
+    ctx.set('Content-disposition', 'attachment; filename=' +
+      filename)
+    const fileType = filename.substr(filename.lastIndexOf('.') + 1, filename.length - 1)
+    ctx.set('Content-type', 'application/' + fileType)
+    ctx.body = fs.readFileSync(filePath)
+  }
 }
 
 module.exports = downloadController

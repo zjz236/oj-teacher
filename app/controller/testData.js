@@ -40,12 +40,13 @@ class TestDataController extends Controller {
           msg: '请添加输出文件'
         }
       }
+      const { getFile } = ctx.helper.ossUtil
       if (!output.exit && exitResult.outputFile) {
-        const data = await ctx.oss.get(exitResult.outputFile)
+        const data = await getFile(exitResult.outputFile)
         output.data = data.toString()
       }
       if (!input.exit && exitResult.inputFile) {
-        const data = await ctx.oss.get(exitResult.inputFile)
+        const data = await getFile(exitResult.inputFile)
         input.data = data.toString()
       }
       const result = await mongo.insertOne('processResult', {
@@ -157,11 +158,12 @@ class TestDataController extends Controller {
       const { gapId, status, errMsg } = ctx.request.body
       let inputFile = null,
         outputFile = null
+      const { putFile, deleteFile } = ctx.helper.ossUtil
       for (const file of files) {
         if (file.fieldname === 'inputFile') {
-          inputFile = await ctx.oss.put(`testData/inputData/${fileName}.in`, file.filepath, { headers: { 'Content-Disposition': 'attachment' } })
+          inputFile = await putFile(`inputData/${fileName}.in`, file.filepath, { headers: { 'Content-Disposition': 'attachment' } })
         } else if (file.fieldname === 'outputFile') {
-          outputFile = await ctx.oss.put(`testData/outputData/${fileName}.out`, file.filepath, { headers: { 'Content-Disposition': 'attachment' } })
+          outputFile = await putFile(`outputData/${fileName}.out`, file.filepath, { headers: { 'Content-Disposition': 'attachment' } })
         }
       }
       const { value: updataValue } = await mongo.findOneAndUpdate('gapTestData', {
@@ -200,9 +202,9 @@ class TestDataController extends Controller {
           }
         }
       } else {
-        ctx.oss.delete(updataValue.inputFile)
+        deleteFile(updataValue.inputFile)
           .catch(e => e)
-        ctx.oss.delete(updataValue.outputFile)
+        deleteFile(updataValue.outputFile)
           .catch(e => e)
         ctx.body = {
           code: 1,
@@ -210,6 +212,7 @@ class TestDataController extends Controller {
         }
       }
     } catch (e) {
+      console.error(e)
       ctx.body = {
         code: 0,
         msg: '系统异常'
@@ -253,10 +256,11 @@ class TestDataController extends Controller {
           gapId: ObjectID(gapId)
         }
       })
+      const { deleteFile } = ctx.helper.ossUtil
       if (deleteValue) {
-        ctx.oss.delete(deleteValue.inputFile)
+        deleteFile(deleteValue.inputFile)
           .catch(e => e)
-        ctx.oss.delete(deleteValue.outputFile)
+        deleteFile(deleteValue.outputFile)
           .catch(e => e)
         ctx.body = {
           code: 1,

@@ -16,6 +16,7 @@ module.exports = app => {
   router.get('/oj/examList/getExamList', controller.examList.getExamList)
   router.get('/oj/examList/getExamInfo', controller.examList.getExamInfo)
   router.get('/oj/download/:type/:filename', controller.download.downloadSome)
+  router.get('/oj/getFile/:filepath/:filename', controller.download.getFile)
   router.post('/oj/classes/addClasses', controller.classes.addClasses)
   router.get('/oj/classes/getClassList', controller.classes.getClassList)
   router.get('/oj/classes/getClassInfo', controller.classes.getClassInfo)
