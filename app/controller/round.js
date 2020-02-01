@@ -179,7 +179,7 @@ class downloadController extends Controller {
         }
       })
       fs.writeFileSync(path.join(__dirname, '../public/outputData/' + fileName + '.out'), runnerResult.output)
-      const child = shell.exec(`python ${path.join(__dirname, '../public/loRun.py')} ${runShell} ${inputFile} outputData/${fileName}.out`, {
+      const child = shell.exec(`python ${path.join(__dirname, '../source/test.py')} ${runShell} ${inputFile} outputData/${fileName}.out`, {
         silent: true,
         timeout: 10000
       })
