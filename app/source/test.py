@@ -25,6 +25,8 @@ def compileSrc(src_path):
 def runone(p_path, in_path, out_path):
     fin = open(in_path)
     ftemp = open('temp.out', 'w')
+    print(fin)
+    print(ftemp)
 
     runcfg = {
         'args':[p_path],
@@ -53,8 +55,6 @@ def runone(p_path, in_path, out_path):
 def judge(src_path, td_path, td_in):
         in_path = os.path.join(os.path.dirname(__file__), '../public/', td_path)
         out_path = os.path.join(os.path.dirname(__file__), '../public/', td_in)
-        print(in_path)
-        print(out_path)
         if os.path.isfile(in_path) and os.path.isfile(out_path):
             rst = runone(src_path, in_path, out_path)
             rst['result'] = RESULT_STR[rst['result']]
