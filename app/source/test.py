@@ -39,6 +39,7 @@ def runone(p_path, in_path, out_path):
     }
 
     rst = lorun.run(runcfg)
+    print(rst)
     fin.close()
     ftemp.close()
 
