@@ -26,34 +26,19 @@ def runone(p_path, in_path, out_path):
     fin = open(in_path)
     fout = open(out_path)
     ftemp = open('temp.out', 'w')
-    print(p_path)
-    print(fin.fileno())
-    print(ftemp.fileno())
 
     runcfg = {
         'args':p_path,
         'fd_in':fin.fileno(),
         'fd_out':ftemp.fileno(),
-        'timelimit':1000, #in MS
-        'memorylimit':20000, #in KB
+        'timelimit':5000, #in MS
+        'memorylimit':200000, #in KB
     }
 
     rst = lorun.run(runcfg)
     print(rst)
     fin.close()
     ftemp.close()
-
-    if rst['result'] == 0:
-        ftemp = open('temp.out')
-        fout = open(out_path)
-        crst = lorun.check(fout.fileno(), ftemp.fileno())
-        fout.close()
-        ftemp.close()
-        os.remove('temp.out')
-        if crst != 0:
-            return {'result':crst}
-
-    return rst
 
 def judge(src_path, td_path, td_in):
         in_path = os.path.join(os.path.dirname(__file__), '../public/', td_path)
@@ -72,5 +57,4 @@ if __name__ == '__main__':
         print('Usage:%s srcfile testdata_pth testdata_total')
         exit(-1)
     shell = sys.argv[1].split(',')
-    print(shell)
     judge(shell, sys.argv[2], sys.argv[3])
