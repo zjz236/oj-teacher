@@ -199,7 +199,9 @@ class downloadController extends Controller {
         timeout: 10000
       })
       if (child.stdout) {
-        const str = child.stdout.replace('/n', '').replace('L', '').replace('\'', '')
+        const str = child.stdout.replace(new RegExp('/n', 'g'), '')
+          .replace(new RegExp('L', 'g'), '')
+          .replace(new RegExp("'", 'g'), '"')
         console.log(str)
         const result = JSON.parse(str)
         console.log(result)
