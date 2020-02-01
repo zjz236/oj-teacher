@@ -63,7 +63,8 @@ def judge(src_path, td_path, td_in):
 
 if __name__ == '__main__':
     import sys
+    print(len(sys.argv))
     if len(sys.argv) != 4:
         print('Usage:%s srcfile testdata_pth testdata_total')
         exit(-1)
-    judge(sys.argv[1], sys.argv[2], sys.argv[3]))
+    judge(sys.argv[1], sys.argv[2], sys.argv[3])
