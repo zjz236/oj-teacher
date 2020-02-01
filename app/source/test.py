@@ -36,16 +36,15 @@ def runone(p_path, in_path, out_path):
     }
 
     rst = lorun.run(runcfg)
-    print(rst)
     fin.close()
     ftemp.close()
+    return rst
 
 def judge(src_path, td_path, td_in):
         in_path = os.path.join(os.path.dirname(__file__), '../public/', td_path)
         out_path = os.path.join(os.path.dirname(__file__), '../public/', td_in)
         if os.path.isfile(in_path) and os.path.isfile(out_path):
             rst = runone(src_path, in_path, out_path)
-            rst['result'] = RESULT_STR[rst['result']]
             print(rst)
         else:
             print('testdata: incompleted')
