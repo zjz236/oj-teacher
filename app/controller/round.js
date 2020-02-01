@@ -38,7 +38,7 @@ class downloadController extends Controller {
       const fileName = getRandomNumber()
       let filePath
       if (language === 'c') {
-        filePath = path.join(__dirname, '../source/code/c/')
+        filePath = path.join(__dirname, '../public/code/c/')
         fs.writeFileSync(filePath + fileName + '.c', code)
         const res = shell.exec(`gcc ${fileName + '.c'} -o ${fileName + '.o'}`, { async: false, cwd: filePath })
         if (res.code) {
@@ -61,7 +61,7 @@ class downloadController extends Controller {
           return
         }
       } else if (language === 'cpp') {
-        filePath = path.join(__dirname, '../source/code/cpp/')
+        filePath = path.join(__dirname, '../public/code/cpp/')
         fs.writeFileSync(filePath + fileName + '.cpp', code)
         const res = shell.exec(`g++ ${fileName + '.cpp'} -o ${fileName + '.o'}`, { async: false, cwd: filePath })
         if (res.code) {
@@ -83,7 +83,7 @@ class downloadController extends Controller {
           return
         }
       } else if (language === 'java') {
-        filePath = path.join(__dirname, '../source/code/java/' + fileName + '/')
+        filePath = path.join(__dirname, '../public/code/java/' + fileName + '/')
         fs.mkdirSync(filePath)
         fs.writeFileSync(filePath + 'Main.java', code)
         const res = shell.exec(`javac ${'Main.java'}`, { async: false, cwd: filePath })
@@ -104,7 +104,7 @@ class downloadController extends Controller {
           return
         }
       } else if (language === 'python') {
-        filePath = path.join(__dirname, '../source/code/python/')
+        filePath = path.join(__dirname, '../public/code/python/')
         fs.writeFileSync(filePath + fileName + '.py', code)
       }
       let runShell = ''
@@ -179,7 +179,7 @@ class downloadController extends Controller {
         }
       })
       fs.writeFileSync(path.join(__dirname, '../public/outputData/' + fileName + '.out'), runnerResult.output)
-      const child = shell.exec(`python ${path.join(__dirname, '../source/loRun.py')} ${runShell} ${inputFile} outputData/${fileName}.out`, {
+      const child = shell.exec(`python ${path.join(__dirname, '../public/loRun.py')} ${runShell} ${inputFile} outputData/${fileName}.out`, {
         silent: true,
         timeout: 10000
       })
@@ -197,7 +197,7 @@ class downloadController extends Controller {
         case 'java':
           fs.unlinkSync(filePath + 'Main.java')
           fs.unlinkSync(filePath + 'Main.class')
-          fs.rmdirSync(path.join(__dirname, '../source/code/java/' + fileName))
+          fs.rmdirSync(path.join(__dirname, '../public/code/java/' + fileName))
           break
         default:
           fs.unlinkSync(filePath + fileName + '.py')
