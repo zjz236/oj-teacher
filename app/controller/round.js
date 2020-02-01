@@ -188,10 +188,10 @@ class downloadController extends Controller {
           testShell = filePath + fileName + '.o'
           break
         case 'java':
-          testShell = `java -cp ${filePath} Main`
+          testShell = `java,-cp,${filePath},Main`
           break
         default:
-          testShell = `python3 ${filePath + fileName}.py`
+          testShell = `python3,${filePath + fileName}.py`
           break
       }
       const child = shell.exec(`python ${path.join(__dirname, '../source/test.py')} ${testShell} ${inputFile} outputData/${fileName}.out`, {
