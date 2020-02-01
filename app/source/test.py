@@ -51,8 +51,8 @@ def runone(p_path, in_path, out_path):
     return rst
 
 def judge(src_path, td_path, td_in):
-        in_path = os.path.join('../public/', td_path)
-        out_path = os.path.join('../public/', td_in)
+        in_path = os.path.join(os.path.dirname(__file__), '../public/', td_path)
+        out_path = os.path.join(os.path.dirname(__file__), '../public/', td_in)
         print(in_path)
         print(out_path)
         if os.path.isfile(in_path) and os.path.isfile(out_path):
