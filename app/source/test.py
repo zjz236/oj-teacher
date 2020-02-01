@@ -25,8 +25,8 @@ def compileSrc(src_path):
 def runone(p_path, in_path, out_path):
     fin = open(in_path)
     ftemp = open('temp.out', 'w')
-    print(fin)
-    print(ftemp)
+    print(fin.fileno())
+    print(ftemp.fileno())
 
     runcfg = {
         'args':[p_path],
