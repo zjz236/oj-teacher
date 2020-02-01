@@ -198,9 +198,10 @@ class downloadController extends Controller {
         silent: true,
         timeout: 10000
       })
-      if (JSON.parse(child.stdout.replace('/n', ''))) {
+      if (child.stdout) {
+        console.log(child.stdout.replace('/n', ''))
         const result = JSON.parse(child.stdout.replace('/n', ''))
-        console.log(result)
+        console.log(result, child.stdout.replace('/n', ''))
       }
       setTimeout(() => runner(), 10)
       fs.unlinkSync(path.join(__dirname, '../public/outputData/' + fileName + '.out'))
