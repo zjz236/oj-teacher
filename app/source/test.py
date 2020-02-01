@@ -53,17 +53,18 @@ def runone(p_path, in_path, out_path):
 def judge(src_path, td_path, td_in):
         in_path = os.path.join('../public/', td_path)
         out_path = os.path.join('../public/', td_in)
+        print(in_path)
+        print(out_path)
         if os.path.isfile(in_path) and os.path.isfile(out_path):
             rst = runone(src_path, in_path, out_path)
             rst['result'] = RESULT_STR[rst['result']]
             print(rst)
         else:
-            print('testdata:%d incompleted' % i)
+            print('testdata:%d incompleted' %i)
             exit(-1)
 
 if __name__ == '__main__':
     import sys
-    print(len(sys.argv))
     if len(sys.argv) != 4:
         print('Usage:%s srcfile testdata_pth testdata_total')
         exit(-1)
