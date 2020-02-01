@@ -183,7 +183,11 @@ class downloadController extends Controller {
         silent: true,
         timeout: 10000
       })
-      console.log(child.stdout)
+      console.log({
+        code: child.code,
+        out: child.stdout,
+        err: child.stderr
+      })
       setTimeout(() => runner(), 10)
       fs.unlinkSync(path.join(__dirname, '../public/outputData/' + fileName + '.out'))
       switch (language) {
