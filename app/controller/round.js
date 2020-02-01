@@ -184,6 +184,7 @@ class downloadController extends Controller {
         timeout: 10000
       })
       console.log({
+        stdin: child,
         code: child.code,
         out: child.stdout,
         err: child.stderr
