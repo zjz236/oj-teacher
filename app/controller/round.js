@@ -179,7 +179,22 @@ class downloadController extends Controller {
         }
       })
       fs.writeFileSync(path.join(__dirname, '../public/outputData/' + fileName + '.out'), runnerResult.output)
-      const child = shell.exec(`python ${path.join(__dirname, '../source/test.py')} ${runShell} ${inputFile} outputData/${fileName}.out`, {
+      let testShell = ''
+      switch (language) {
+        case 'c':
+          testShell = filePath + fileName + '.o'
+          break
+        case 'cpp':
+          testShell = filePath + fileName + '.o'
+          break
+        case 'java':
+          testShell = `java -cp ${filePath} Main`
+          break
+        default:
+          testShell = `python3 ${filePath + fileName}.py`
+          break
+      }
+      const child = shell.exec(`python ${path.join(__dirname, '../source/test.py')} ${testShell} ${inputFile} outputData/${fileName}.out`, {
         silent: true,
         timeout: 10000
       })
