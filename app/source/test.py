@@ -31,7 +31,7 @@ def runone(p_path, in_path, out_path):
     print(ftemp.fileno())
 
     runcfg = {
-        'args':[p_path],
+        'args':p_path,
         'fd_in':fin.fileno(),
         'fd_out':ftemp.fileno(),
         'timelimit':1000, #in MS
@@ -70,6 +70,6 @@ if __name__ == '__main__':
     if len(sys.argv) != 4:
         print('Usage:%s srcfile testdata_pth testdata_total')
         exit(-1)
-    shell = ' '.join(sys.argv[1].split(','))
+    shell = sys.argv[1].split(',')
     print(shell)
     judge(shell, sys.argv[2], sys.argv[3])
