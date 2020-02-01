@@ -8,7 +8,10 @@ class downloadController extends Controller {
   async runner() {
     const { ctx, app } = this
     const mongo = app.mongo.get('oj')
-    runner()
+    setTimeout(() => runner(), 0)
+    setTimeout(() => runner(), 10)
+    setTimeout(() => runner(), 20)
+    setTimeout(() => runner(), 30)
 
     async function runner() {
       const { value } = await mongo.findOneAndUpdate('processResult', {
@@ -36,12 +39,13 @@ class downloadController extends Controller {
       let filePath
       if (language === 'c') {
         filePath = path.join(__dirname, '../source/code/c/')
-        fs.writeFileSync(filePath + getRandomNumber + '.c', code)
-        const res = shell.exec(`gcc ${filePath + fileName + '.c'} -o ${filePath + fileName + '.o'}`, { async: false })
+        fs.writeFileSync(filePath + fileName + '.c', code)
+        const res = shell.exec(`gcc ${fileName + '.c'} -o ${fileName + '.o'}`, { async: false, cwd: filePath })
         if (res.code) {
           let error = res.stderr
           const reg = new RegExp(`${filePath + fileName + '.c'}:`, 'g')
           error = error.replace(reg, '')
+          console.log(error)
           await mongo.findOneAndUpdate('processResult', {
             filter: {
               _id: value._id
@@ -59,7 +63,7 @@ class downloadController extends Controller {
       } else if (language === 'cpp') {
         filePath = path.join(__dirname, '../source/code/cpp/')
         fs.writeFileSync(filePath + fileName + '.cpp', code)
-        const res = shell.exec(`gcc ${filePath + fileName + '.cpp'} -o ${filePath + fileName + '.o'}`, { async: false })
+        const res = shell.exec(`g++ ${fileName + '.cpp'} -o ${fileName + '.o'}`, { async: false, cwd: filePath })
         if (res.code) {
           let error = res.stderr
           const reg = new RegExp(`${filePath + fileName + '.cpp'}:`, 'g')
@@ -82,11 +86,9 @@ class downloadController extends Controller {
         filePath = path.join(__dirname, '../source/code/java/' + fileName + '/')
         fs.mkdirSync(filePath)
         fs.writeFileSync(filePath + 'Main.java', code)
-        const res = shell.exec(`javac ${filePath + 'Main.java'}`, { async: false })
+        const res = shell.exec(`javac ${'Main.java'}`, { async: false, cwd: filePath })
         if (res.code) {
-          let error = res.stderr
-          const reg = new RegExp(`${filePath + 'Main.java'}:`, 'g')
-          error = error.replace(reg, '')
+          const error = res.stderr
           await mongo.findOneAndUpdate('processResult', {
             filter: {
               _id: value._id
@@ -101,30 +103,32 @@ class downloadController extends Controller {
           setTimeout(() => runner(), 500)
           return
         }
-      } else if (language === 'java') {
+      } else if (language === 'python') {
         filePath = path.join(__dirname, '../source/code/python/')
         fs.writeFileSync(filePath + fileName + '.py', code)
       }
       let runShell = ''
       switch (language) {
         case 'c':
-          runShell = filePath + fileName + '.o'
+          runShell = './' + fileName + '.o'
           break
         case 'cpp':
-          runShell = filePath + fileName + '.o'
+          runShell = './' + fileName + '.o'
           break
         case 'java':
-          runShell = `java ${filePath}Main`
+          runShell = 'java Main'
           break
         default:
-          runShell = `python3 ${filePath + fileName}.py`
+          runShell = `python3 ${fileName}.py`
           break
       }
+      console.log('runShell', runShell)
       const runnerResult = await new Promise(resolve => {
         const child = shell.exec(runShell, {
-          silent: true,
+          // silent: true,
           async: true,
-          timeout: 3000
+          timeout: 10000,
+          cwd: filePath
         })
         child.on('error', err => {
           resolve({
@@ -140,6 +144,7 @@ class downloadController extends Controller {
           outputResult += data
         })
         child.on('close', () => {
+          console.log(outputResult)
           resolve({
             code: 0,
             output: outputResult
@@ -178,7 +183,26 @@ class downloadController extends Controller {
         silent: true,
         timeout: 10000
       })
-      console.log(child.stdout)
+      setTimeout(() => runner(), 10)
+      fs.unlinkSync(path.join(__dirname, '../public/outputData/' + fileName + '.out'))
+      switch (language) {
+        case 'c':
+          fs.unlinkSync(filePath + fileName + '.c')
+          fs.unlinkSync(filePath + fileName + '.o')
+          break
+        case 'cpp':
+          fs.unlinkSync(filePath + fileName + '.cpp')
+          fs.unlinkSync(filePath + fileName + '.o')
+          break
+        case 'java':
+          fs.unlinkSync(filePath + 'Main.java')
+          fs.unlinkSync(filePath + 'Main.class')
+          fs.rmdirSync(path.join(__dirname, '../source/code/java/' + fileName))
+          break
+        default:
+          fs.unlinkSync(filePath + fileName + '.py')
+          break
+      }
     }
   }
 }
