@@ -60,7 +60,7 @@ def judge(src_path, td_path, td_in):
             rst['result'] = RESULT_STR[rst['result']]
             print(rst)
         else:
-            print('testdata:%d incompleted' %i)
+            print('testdata: incompleted')
             exit(-1)
 
 if __name__ == '__main__':
