@@ -16,6 +16,15 @@ module.exports = app => {
       const cert = fs.readFileSync(path.join(__dirname, '../source/cert/rsa_private_key.pem')) // 私钥，看后面生成方法
       return jwt.sign({ data, exp }, cert, { algorithm: 'RS256' })
     },
+    gapCodeShow(code, gaps) {
+      for (const index in gaps) {
+        const gap = gaps[parseInt(index)]
+        if (gap && code.indexOf(`_(${parseInt(index) + 1})_`) >= 0) {
+          code = code.replace(`_(${parseInt(index) + 1})_`, gap)
+        }
+      }
+      return code
+    },
     readUsername(data) {
       const username = new Set()
       for (let i = 0; i < data.length; i++) {

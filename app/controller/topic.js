@@ -21,7 +21,7 @@ class TopicController extends Controller {
         const { description, code, gaps, section, difficulty, notes, common } = ctx.request.body
         Object.assign(modifyDoc, { description, code, gaps, section, difficulty, notes, common, userId })
       } else if (topicType === 'programTopic') {
-        const { title, description, inputDesc, outputDesc, simpleInput, simpleOutput, section, difficulty, notes, common } = ctx.request.body
+        const { title, description, inputDesc, outputDesc, simpleInput, simpleOutput, timeLimit, memoryLimit, section, difficulty, notes, common } = ctx.request.body
         Object.assign(modifyDoc, {
           title,
           description,
@@ -29,6 +29,8 @@ class TopicController extends Controller {
           outputDesc,
           simpleInput,
           simpleOutput,
+          timeLimit,
+          memoryLimit,
           section,
           difficulty,
           notes,
@@ -90,6 +92,13 @@ class TopicController extends Controller {
       const mongo = app.mongo.get('oj')
       const filter = filters.split(',')
         .map(item => parseInt(item))
+      const total = await mongo.countDocuments(topicType, {
+        query: Object.assign({ common: JSON.parse(common) }, common ? {} : { userId }, filters ? {
+          section: {
+            $in: filter
+          }
+        } : {})
+      })
       const result = await mongo.find(topicType, {
         query: Object.assign({ common: JSON.parse(common) }, common ? {} : { userId }, filters ? {
           section: {
@@ -102,7 +111,8 @@ class TopicController extends Controller {
       ctx.body = {
         code: 1,
         data: {
-          list: result
+          list: result,
+          total
         },
         msg: 'success'
       }
@@ -149,18 +159,19 @@ class TopicController extends Controller {
   }
 
   async deleteTopic() {
-    const { ctx, app } = this
+    const { ctx } = this
     try {
       const { topicId, topicType } = ctx.request.query
       const { userId } = ctx
-      const mongo = app.mongo.get('oj')
-      const result = await mongo.findOneAndDelete(topicType, {
-        filter: {
-          _id: ObjectID(topicId),
-          userId
-        }
-      })
-      if (result.lastErrorObject.n) {
+      const topic = {
+        tfTopic: 'tf',
+        selectTopic: 'select',
+        gapTopic: 'gap',
+        programTopic: 'program'
+      }
+      const { deleteTopic } = ctx.helper.deleteUtil
+      const result = await deleteTopic({ topicId, topicType: topic[topicType], userId })
+      if (result) {
         ctx.body = {
           code: 1,
           msg: '删除成功'

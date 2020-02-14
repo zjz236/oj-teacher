@@ -67,7 +67,7 @@ module.exports = appInfo => {
   config.middleware = [ 'jwt' ]
   // jwt配置
   config.jwt = {
-    ignore: [ '/oj/account/login', '/oj/round/runner', '/oj/upload' ]
+    ignore: [ '/oj/account/login', '/oj/upload', '/oj/upload/uploadTestData', '/oj/grade/gradeExport' ]
   }
   config.cors = {
     origin: '*',

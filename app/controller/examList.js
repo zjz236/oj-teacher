@@ -113,10 +113,6 @@ class examListController extends Controller {
         options: {
           projection: {
             userId: 0,
-            tfStatus: 0,
-            selectStatus: 0,
-            gapStatus: 0,
-            programStatus: 0,
             createTime: 0
           }
         }
@@ -150,8 +146,8 @@ class examListController extends Controller {
           $set: {
             examName,
             isShow,
-            startTime,
-            finishTime,
+            startTime: new Date(startTime),
+            finishTime: new Date(finishTime),
             language,
             isExam,
             isSort,
@@ -175,6 +171,102 @@ class examListController extends Controller {
       ctx.body = {
         msg: '系统异常',
         code: 0
+      }
+    }
+  }
+
+  async examAnalysis() {
+    const { ctx, app } = this
+    try {
+      const { examId } = ctx.request.query
+      const mongo = app.mongo.get('oj')
+      const examInfo = await mongo.findOne('examList', {
+        query: {
+          _id: ObjectID(examId)
+        }
+      })
+      const examinee = await mongo.find('examinee', {
+        query: {
+          examId: ObjectID(examId)
+        }
+      })
+      const examTFTopic = await mongo.aggregate('examTFTopic', {
+        pipeline: [
+          {
+            $match: { examId: ObjectID(examId) }
+          },
+          {
+            $lookup: {
+              from: 'examTFAnswer',
+              localField: '_id',
+              foreignField: 'topicId',
+              as: 'answer'
+            }
+          }
+        ]
+      })
+      const examSelectTopic = await mongo.aggregate('examSelectTopic', {
+        pipeline: [
+          {
+            $match: { examId: ObjectID(examId) }
+          },
+          {
+            $lookup: {
+              from: 'examSelectAnswer',
+              localField: '_id',
+              foreignField: 'topicId',
+              as: 'answer'
+            }
+          }
+        ]
+      })
+      const examGapTopic = await mongo.aggregate('examGapTopic', {
+        pipeline: [
+          {
+            $match: { examId: ObjectID(examId) }
+          },
+          {
+            $lookup: {
+              from: 'examGapAnswer',
+              localField: '_id',
+              foreignField: 'topicId',
+              as: 'answer'
+            }
+          }
+        ]
+      })
+      const examProgramTopic = await mongo.aggregate('examProgramTopic', {
+        pipeline: [
+          {
+            $match: { examId: ObjectID(examId) }
+          },
+          {
+            $lookup: {
+              from: 'examProgramAnswer',
+              localField: '_id',
+              foreignField: 'topicId',
+              as: 'answer'
+            }
+          }
+        ]
+      })
+      ctx.body = {
+        code: 1,
+        msg: 'success',
+        data: {
+          examInfo,
+          examinee,
+          examTFTopic,
+          examSelectTopic,
+          examGapTopic,
+          examProgramTopic
+        }
+      }
+    } catch (e) {
+      console.error(e)
+      ctx.body = {
+        code: 0,
+        msg: '系统异常'
       }
     }
   }

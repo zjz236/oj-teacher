@@ -73,11 +73,8 @@ class ClassesController extends Controller {
           }
         })
         if (result.value) {
-          await mongo.deleteMany('classesStudent', {
-            filter: {
-              classId: ObjectID(classId)
-            }
-          })
+          const { deleteClassesStudent } = ctx.helper.deleteUtil
+          await deleteClassesStudent({ classId })
           students.forEach(item => {
             item.classId = ObjectID(classId)
           })
@@ -203,23 +200,13 @@ class ClassesController extends Controller {
   }
 
   async deleteClass() {
-    const { ctx, app } = this
+    const { ctx } = this
     const { userId } = ctx
     const { classId } = ctx.request.query
-    const mongo = app.mongo.get('oj')
     try {
-      const { result } = await mongo.deleteMany('classes', {
-        filter: {
-          _id: ObjectID(classId),
-          userId
-        }
-      })
-      if (result.n) {
-        await mongo.deleteMany('classesStudent', {
-          filter: {
-            classId: ObjectID(classId)
-          }
-        })
+      const { deleteClasses } = ctx.helper.deleteUtil
+      const result = await deleteClasses({ classId, userId })
+      if (result) {
         ctx.body = {
           msg: '删除成功',
           code: 1

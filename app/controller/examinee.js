@@ -20,11 +20,8 @@ class examineeController extends Controller {
           examId
         }
       })
-      await mongo.deleteMany('examinee', {
-        filter: {
-          examId
-        }
-      })
+      const { deleteExaminee } = ctx.helper.deleteUtil
+      await deleteExaminee({ examId })
       const classes = []
       for (const item of classList) {
         classes.push({
@@ -93,7 +90,6 @@ class examineeController extends Controller {
             selectScore: 0,
             gapScore: 0,
             programScore: 0,
-            score: 0,
             isLogin: false
           }
         })
@@ -188,16 +184,40 @@ class examineeController extends Controller {
           }
         }
       })
-      const result = await mongo.find('examinee', {
-        query: {
-          examId: ObjectID(examId),
-          name: {
-            $regex: reg
-          }
-        },
-        limit: parseInt(pageSize),
-        skip: parseInt(pageNo - 1),
-        sort
+      const pipeline = []
+      pipeline.push({
+        $project: {
+          score: { $add: [ '$tfScore', '$selectScore', '$gapScore', '$programScore' ] },
+          username: 1,
+          password: 1,
+          name: 1,
+          sex: 1,
+          studentId: 1,
+          notes: 1,
+          classId: 1,
+          school: 1,
+          className: 1,
+          college: 1,
+          major: 1,
+          tfScore: 1,
+          selectScore: 1,
+          gapScore: 1,
+          programScore: 1,
+          isLogin: 1,
+          examId: 1
+        }
+      })
+      sortedName && pipeline.push({
+        $sort: sort
+      })
+      pipeline.push({
+        $skip: parseInt(pageNo - 1)
+      })
+      pipeline.push({
+        $limit: parseInt(pageSize)
+      })
+      const result = await mongo.aggregate('examinee', {
+        pipeline
       })
       ctx.body = {
         code: 1,
@@ -288,16 +308,12 @@ class examineeController extends Controller {
   }
 
   async deleteExaminee() {
-    const { ctx, app } = this
+    const { ctx } = this
     try {
-      const mongo = app.mongo.get('oj')
       const { examineeId } = ctx.request.query
-      const result = await mongo.findOneAndDelete('examinee', {
-        filter: {
-          _id: ObjectID(examineeId)
-        }
-      })
-      if (result.lastErrorObject.n) {
+      const { deleteExaminee } = ctx.helper.deleteUtil
+      const result = await deleteExaminee({ userId: examineeId })
+      if (result) {
         ctx.body = {
           code: 1,
           msg: '删除成功'
