@@ -211,7 +211,7 @@ class examineeController extends Controller {
         $sort: sort
       })
       pipeline.push({
-        $skip: parseInt(pageNo - 1)
+        $skip: (parseInt(pageNo) - 1) * parseInt(pageSize)
       })
       pipeline.push({
         $limit: parseInt(pageSize)

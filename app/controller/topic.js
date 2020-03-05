@@ -106,7 +106,7 @@ class TopicController extends Controller {
           }
         } : {}),
         limit: parseInt(pageSize),
-        skip: parseInt(pageNo - 1)
+        skip: (parseInt(pageNo) - 1) * parseInt(pageSize)
       })
       ctx.body = {
         code: 1,

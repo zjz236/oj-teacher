@@ -80,7 +80,7 @@ class examListController extends Controller {
           createTime: 0
         },
         limit: parseInt(pageSize),
-        skip: parseInt(pageNo - 1)
+        skip: (parseInt(pageNo) - 1) * parseInt(pageSize)
       })
       ctx.body = {
         code: 1,

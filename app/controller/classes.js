@@ -132,7 +132,7 @@ class ClassesController extends Controller {
           }
         },
         limit: parseInt(pageSize),
-        skip: parseInt(pageNo - 1)
+        skip: (parseInt(pageNo) - 1) * parseInt(pageSize)
       })
       for (const item of result) {
         item.studentNum = await mongo.countDocuments('classesStudent', {

@@ -144,7 +144,7 @@ class accountController extends Controller {
           username: 1, trueName: 1, sex: 1, school: 1, email: 1, isAdmin: 1, createTime: 1
         },
         limit: parseInt(pageSize),
-        skip: parseInt(pageNo - 1)
+        skip: (parseInt(pageNo) - 1) * parseInt(pageSize)
       })
       ctx.body = {
         code: 1,
