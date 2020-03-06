@@ -67,7 +67,7 @@ module.exports = appInfo => {
   config.middleware = [ 'jwt' ]
   // jwt配置
   config.jwt = {
-    ignore: [ '/oj/account/login', '/oj/upload', '/oj/upload/uploadTestData', '/oj/grade/gradeExport' ]
+    ignore: [ '/oj/account/login', '/oj/upload', '/oj/upload/uploadTestData', '/oj/grade/gradeExport', '/' ]
   }
   // add your user config here
   const userConfig = {
