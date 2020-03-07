@@ -10,7 +10,10 @@ class uploadController extends Controller {
     const { ctx } = this
     const { putFile } = ctx.helper.ossUtil
     const file = ctx.request.files[0]
-    const name = 'img/' + path.basename(file.filename)
+    const { getRandomNumber } = ctx.helper.util
+    const name = 'img/' + getRandomNumber() + '.' + path.basename(file.filename)
+      .substr(path.basename(file.filename)
+        .lastIndexOf('.') + 1, path.basename(file.filename).length)
     let result
     try {
       result = await putFile(name, file.filepath)
@@ -21,7 +24,7 @@ class uploadController extends Controller {
     }
 
     ctx.body = {
-      url: result.url,
+      url: 'public/' + result.name,
       requestBody: ctx.request.body
     }
   }

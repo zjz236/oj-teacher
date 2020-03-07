@@ -282,6 +282,7 @@ class TestDataController extends Controller {
   async uploadProgramTest() {
     const { ctx, app } = this
     try {
+      console.log(ctx)
       const file = ctx.request.files[0]
       const { programId, testId, programType } = ctx.request.body
       const { putFile } = ctx.helper.ossUtil
