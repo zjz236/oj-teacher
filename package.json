@@ -21,7 +21,9 @@
     "fs": "0.0.1-security",
     "jsonwebtoken": "^8.5.1",
     "mongodb": "^3.4.0",
-    "shelljs": "^0.8.3"
+    "node-rsa": "^1.0.7",
+    "shelljs": "^0.8.3",
+    "vm2": "^3.8.4"
   },
   "devDependencies": {
     "autod": "^3.0.1",
