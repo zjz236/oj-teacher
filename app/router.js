@@ -9,6 +9,7 @@ module.exports = app => {
   router.post('/upload', controller.upload.uploadImg)
   router.post('/upload/uploadTestData', controller.upload.uploadTestData)
   router.post('/account/login', controller.account.login)
+  router.get('/account/getPublicKey', controller.account.getPublicKey)
   router.post('/account/addUser', controller.account.addUser)
   router.get('/account/getUserInfo', controller.account.getUserInfo)
   router.get('/account/getUserList', controller.account.getUserList)

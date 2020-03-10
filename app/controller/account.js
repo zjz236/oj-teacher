@@ -2,14 +2,22 @@
 
 const Controller = require('egg').Controller
 const ObjectID = require('mongodb').ObjectID
+const fs = require('fs')
+const path = require('path')
+const NodeRSA = require('node-rsa')
 
 class accountController extends Controller {
   async login() {
     const { ctx, app } = this
-    const { username, password } = ctx.request.body
+    let { username, password } = ctx.request.body
     const { md5Update, loginToken } = ctx.helper.util
     const mongo = app.mongo.get('oj')
     try {
+      const pri = fs.readFileSync(path.join(__dirname, '../source/loginKey/pri.key'))
+        .toString()
+      const privateKey = new NodeRSA(pri)
+      privateKey.setOptions({ encryptionScheme: 'pkcs1' })
+      password = privateKey.decrypt(password, 'utf8')
       const result = await mongo.findOne('user', {
         query: {
           username,
@@ -49,12 +57,36 @@ class accountController extends Controller {
     }
   }
 
+  async getPublicKey() {
+    const { ctx } = this
+    try {
+      const data = fs.readFileSync(path.join(__dirname, '../source/loginKey/pub.key'))
+        .toString()
+      ctx.body = {
+        code: 1,
+        msg: 'success',
+        data
+      }
+    } catch (e) {
+      console.error(e)
+      ctx.body = {
+        code: 0,
+        msg: '系统异常'
+      }
+    }
+  }
+
   async addUser() {
     const { ctx, app } = this
     const { md5Update } = ctx.helper.util
     const mongo = app.mongo.get('oj')
-    const { username, password, trueName, sex, school, email, editable, userId } = ctx.request.body
+    let { username, password, trueName, sex, school, email, editable, userId } = ctx.request.body
     try {
+      const pri = fs.readFileSync(path.join(__dirname, '../source/loginKey/pri.key'))
+        .toString()
+      const privateKey = new NodeRSA(pri)
+      privateKey.setOptions({ encryptionScheme: 'pkcs1' })
+      password = privateKey.decrypt(password, 'utf8')
       const find = await mongo.findOne('user', {
         query: Object.assign({ username }, editable ? { _id: { $ne: ObjectID(userId) } } : {})
       })
@@ -77,12 +109,12 @@ class accountController extends Controller {
         if (value) {
           ctx.body = {
             code: 1,
-            msg: '添加成功'
+            msg: '修改成功'
           }
         } else {
           ctx.body = {
             code: 0,
-            msg: '添加失败'
+            msg: '修改失败'
           }
         }
         return
@@ -171,7 +203,7 @@ class accountController extends Controller {
         },
         options: {
           projection: {
-            _id: 0, username: 1, trueName: 1, sex: 1, school: 1, email: 1, isAdmin: 1, createTime: 1
+            username: 1, trueName: 1, sex: 1, school: 1, email: 1, isAdmin: 1, createTime: 1
           }
         }
       })
