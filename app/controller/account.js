@@ -17,7 +17,7 @@ class accountController extends Controller {
         }
       })
       if (result && result.username) {
-        const token = loginToken({ username: result.username, userId: result._id }, 24 * 60)
+        const token = loginToken({ username: result.username, userId: result._id }, 3 * 60 * 60)
         await mongo.deleteMany('loginToken', {
           filter: {
             userId: result._id

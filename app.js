@@ -2,6 +2,7 @@
 const fs = require('fs')
 const shell = require('shelljs')
 const path = require('path')
+const { VM } = require('vm2')
 const { getRandomNumber } = require('./app/util/languageCommon')
 
 const deleteFile = fileName => {
@@ -219,9 +220,22 @@ module.exports = app => {
             runShell = `python3 ${fileName}.py`
             break
         }
-        const runnerResult = await new Promise(resolve => {
+        const vm = new VM({
+          require: {
+            external: true
+          },
+          sandbox: {
+            shell,
+            runShell,
+            fs,
+            inputFile,
+            path,
+            filePath,
+            __dirname
+          }
+        })
+        const runnerResult = await vm.run(`new Promise(resolve => {
           const child = shell.exec(runShell, {
-            // silent: true,
             async: true,
             timeout: 10000,
             cwd: filePath,
@@ -246,7 +260,35 @@ module.exports = app => {
               output: outputResult
             })
           })
-        })
+        })`)
+        // const runnerResult = await new Promise(resolve => {
+        //   const child = shell.exec(runShell, {
+        //     // silent: true,
+        //     async: true,
+        //     timeout: 10000,
+        //     cwd: filePath,
+        //     silent: true
+        //   })
+        //   child.on('error', err => {
+        //     resolve({
+        //       code: 1,
+        //       err
+        //     })
+        //   })
+        //   const inputData = inputFile ? fs.readFileSync(path.join(__dirname, './app/public/' + inputFile)) : ''
+        //   child.stdin.write(inputData)
+        //   child.stdin.end()
+        //   let outputResult = ''
+        //   child.stdout.on('data', data => {
+        //     outputResult += data
+        //   })
+        //   child.on('close', () => {
+        //     resolve({
+        //       code: 0,
+        //       output: outputResult
+        //     })
+        //   })
+        // })
         if (runnerResult.code) {
           const error = runnerResult.err
           await mongo.findOneAndUpdate('processResult', {
