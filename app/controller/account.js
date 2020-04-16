@@ -2,21 +2,29 @@
 
 const Controller = require('egg').Controller
 const ObjectID = require('mongodb').ObjectID
-const fs = require('fs')
-const path = require('path')
 const NodeRSA = require('node-rsa')
 
 class accountController extends Controller {
   async login() {
     const { ctx, app } = this
-    let { username, password } = ctx.request.body
+    let { username, password, publicKey } = ctx.request.body
     const { md5Update, loginToken } = ctx.helper.util
     const mongo = app.mongo.get('oj')
     try {
-      const pri = fs.readFileSync(path.join(__dirname, '../source/loginKey/pri.key'))
-        .toString()
-      const privateKey = new NodeRSA(pri)
+      const value = await mongo.findOne('cert', {
+        query: {
+          publicKey
+        }
+      })
+      if (!value) {
+        return ctx.body = {
+          code: 0,
+          msg: '系统异常，请重试'
+        }
+      }
+      const privateKey = new NodeRSA(value.privateKey)
       privateKey.setOptions({ encryptionScheme: 'pkcs1' })
+      console.log(privateKey)
       password = privateKey.decrypt(password, 'utf8')
       const result = await mongo.findOne('user', {
         query: {
@@ -35,6 +43,11 @@ class accountController extends Controller {
           doc: {
             userId: result._id,
             token
+          }
+        })
+        await mongo.findOneAndDelete('cert', {
+          filter: {
+            publicKey
           }
         })
         ctx.body = {
@@ -58,14 +71,30 @@ class accountController extends Controller {
   }
 
   async getPublicKey() {
-    const { ctx } = this
+    const { ctx, app } = this
     try {
-      const data = fs.readFileSync(path.join(__dirname, '../source/loginKey/pub.key'))
-        .toString()
-      ctx.body = {
-        code: 1,
-        msg: 'success',
-        data
+      const key = new NodeRSA({ b: 1024 })
+      key.setOptions({ encryptionScheme: 'pkcs1' })
+      const mongo = app.mongo.get('oj')
+      const publicKey = key.exportKey('pkcs8-public')
+      const privateKey = key.exportKey('pkcs8-private')
+      const { insertedId } = await mongo.insertOne('cert', {
+        doc: {
+          publicKey,
+          privateKey
+        }
+      })
+      if (insertedId) {
+        ctx.body = {
+          code: 1,
+          msg: 'success',
+          data: publicKey
+        }
+      } else {
+        ctx.body = {
+          code: 0,
+          msg: '系统异常'
+        }
       }
     } catch (e) {
       console.error(e)
@@ -80,11 +109,20 @@ class accountController extends Controller {
     const { ctx, app } = this
     const { md5Update } = ctx.helper.util
     const mongo = app.mongo.get('oj')
-    let { username, password, trueName, sex, school, email, editable, userId } = ctx.request.body
+    let { username, password, trueName, sex, school, email, editable, userId, publicKey } = ctx.request.body
     try {
-      const pri = fs.readFileSync(path.join(__dirname, '../source/loginKey/pri.key'))
-        .toString()
-      const privateKey = new NodeRSA(pri)
+      const value = await mongo.findOne('cert', {
+        query: {
+          publicKey
+        }
+      })
+      if (!value) {
+        return ctx.body = {
+          code: 0,
+          msg: '系统异常，请重试'
+        }
+      }
+      const privateKey = new NodeRSA(value.privateKey)
       privateKey.setOptions({ encryptionScheme: 'pkcs1' })
       password = privateKey.decrypt(password, 'utf8')
       const find = await mongo.findOne('user', {
@@ -104,6 +142,11 @@ class accountController extends Controller {
             $set: {
               username, password: md5Update(password), trueName, sex, school, email
             }
+          }
+        })
+        await mongo.findOneAndDelete('cert', {
+          filter: {
+            publicKey
           }
         })
         if (value) {
@@ -132,6 +175,11 @@ class accountController extends Controller {
         }
       })
       if (result.insertedCount) {
+        await mongo.findOneAndDelete('cert', {
+          filter: {
+            publicKey
+          }
+        })
         ctx.body = {
           code: 1,
           msg: '添加成功'

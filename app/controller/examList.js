@@ -48,6 +48,36 @@ class examListController extends Controller {
     }
   }
 
+  async deleteExam() {
+    const { ctx, app } = this
+    try {
+      const { examId } = ctx.request.query
+      const mongo = app.mongo.get('oj')
+      const { value } = await mongo.findOneAndDelete('examList', {
+        filter: {
+          _id: ObjectID(examId)
+        }
+      })
+      if (value) {
+        ctx.body = {
+          code: 1,
+          msg: 'success'
+        }
+      } else {
+        ctx.body = {
+          code: 0,
+          msg: '删除失败'
+        }
+      }
+    } catch (e) {
+      console.error(e)
+      ctx.body = {
+        code: 0,
+        msg: '系统异常'
+      }
+    }
+  }
+
   async getExamList() {
     const { ctx, app } = this
     const { userId } = ctx
@@ -171,6 +201,139 @@ class examListController extends Controller {
       ctx.body = {
         msg: '系统异常',
         code: 0
+      }
+    }
+  }
+
+  async getExamNotice() {
+    const { ctx, app } = this
+    try {
+      const mongo = app.mongo.get('oj')
+      const { examId } = ctx.request.query
+      const result = await mongo.find('notice', {
+        query: {
+          examId: ObjectID(examId)
+        },
+        sort: {
+          _id: 1
+        }
+      })
+      ctx.body = {
+        code: 1,
+        msg: 'success',
+        data: result
+      }
+    } catch (e) {
+      console.error(e)
+      ctx.body = {
+        code: 0,
+        msg: '系统异常'
+      }
+    }
+  }
+
+  async examNoticeModify() {
+    const { ctx, app } = this
+    try {
+      const mongo = app.mongo.get('oj')
+      const { examId, noticeId, content } = ctx.request.body
+      const { userId } = ctx
+      const exam = await mongo.findOne('examList', {
+        query: {
+          _id: ObjectID(examId),
+          userId: ObjectID(userId)
+        }
+      })
+      if (!exam) {
+        return ctx.body = {
+          code: 0,
+          msg: '您无权限'
+        }
+      }
+      if (!noticeId) {
+        await mongo.insertOne('notice', {
+          doc: {
+            content,
+            examId: ObjectID(examId)
+          }
+        })
+      } else {
+        const { value } = await mongo.findOneAndUpdate('notice', {
+          filter: {
+            _id: ObjectID(noticeId)
+          },
+          update: {
+            $set: {
+              content
+            }
+          }
+        })
+        if (!value) {
+          await mongo.insertOne('notice', {
+            doc: {
+              content,
+              examId: ObjectID(examId)
+            }
+          })
+        }
+      }
+      ctx.body = {
+        code: 1,
+        msg: 'success'
+      }
+    } catch (e) {
+      console.error(e)
+      ctx.body = {
+        code: 0,
+        msg: '系统异常'
+      }
+    }
+  }
+
+  async deleteExamNotice() {
+    const { ctx, app } = this
+    try {
+      const mongo = app.mongo.get('oj')
+      const { examId, noticeId, content } = ctx.request.query
+      const { userId } = ctx
+      const exam = await mongo.findOne('examList', {
+        query: {
+          _id: ObjectID(examId),
+          userId: ObjectID(userId)
+        }
+      })
+      if (!exam) {
+        return ctx.body = {
+          code: 0,
+          msg: '您无权限'
+        }
+      }
+      const { value } = await mongo.findOneAndDelete('notice', {
+        filter: {
+          _id: ObjectID(noticeId)
+        },
+        update: {
+          $set: {
+            content
+          }
+        }
+      })
+      if (!value) {
+        ctx.body = {
+          code: 0,
+          msg: '删除失败'
+        }
+      } else {
+        ctx.body = {
+          code: 1,
+          msg: '删除成功'
+        }
+      }
+    } catch (e) {
+      console.error(e)
+      ctx.body = {
+        code: 0,
+        msg: '系统异常'
       }
     }
   }

@@ -480,7 +480,7 @@ class GradeController extends Controller {
                     result[index] = true
                     await mongo.findOneAndUpdate('examGapAnswer', {
                       filter: { _id: ObjectID(item._id) },
-                      update: { $inc: { score: 2, result } }
+                      update: { $inc: { score: 2 }, $set: { result } }
                     })
                     await mongo.findOneAndUpdate('examinee', {
                       filter: { _id: ObjectID(item.userId) },
@@ -490,7 +490,7 @@ class GradeController extends Controller {
                     result[index] = false
                     await mongo.findOneAndUpdate('examGapAnswer', {
                       filter: { _id: ObjectID(item._id) },
-                      update: { $inc: { score: 2, result } }
+                      update: { $inc: { score: 2 }, $set: { result } }
                     })
                   }
                   resolve2(true)
