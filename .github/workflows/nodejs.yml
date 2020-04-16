@@ -32,7 +32,7 @@ jobs:
           REMOTE_HOST: ${{ secrets.HOST }}
           REMOTE_USER: ${{ secrets.USER }}
           SOURCE: ''
-          TARGET: '/var/www/source/oj-student/'
+          TARGET: '/var/www/source/oj-teacher/'
           ARGS: '-avzr --delete'
 
 
