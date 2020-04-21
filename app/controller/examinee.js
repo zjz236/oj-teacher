@@ -216,6 +216,12 @@ class examineeController extends Controller {
       pipeline.push({
         $limit: parseInt(pageSize)
       })
+      pipeline.push({
+        $limit: parseInt(pageSize)
+      })
+      pipeline.push({
+          $match: { examId: ObjectID(examId) }
+      })
       const result = await mongo.aggregate('examinee', {
         pipeline
       })
