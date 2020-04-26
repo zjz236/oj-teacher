@@ -29,13 +29,17 @@ class examineeController extends Controller {
           classId: item
         })
       }
-      const insertClass = await mongo.insertMany('examClasses', {
-        docs: classes
-      })
+      let insertClassResult = true
+      if (classes.length) {
+        const insertClass = await mongo.insertMany('examClasses', {
+          docs: classes
+        })
+        insertClassResult = insertClass.result.ok
+      }
       const insertExaminee = await mongo.insertMany('examinee', {
         docs: studentList
       })
-      if (insertClass.result.ok && insertExaminee.result.ok) {
+      if (insertClassResult && insertExaminee.result.ok) {
         ctx.body = {
           code: 1,
           msg: '添加成功'

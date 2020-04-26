@@ -11,8 +11,8 @@ class accountController extends Controller {
     const { md5Update, loginToken } = ctx.helper.util
     const mongo = app.mongo.get('oj')
     try {
-      const value = await mongo.findOne('cert', {
-        query: {
+      const { value } = await mongo.findOneAndDelete('cert', {
+        filter: {
           publicKey
         }
       })
@@ -43,11 +43,6 @@ class accountController extends Controller {
           doc: {
             userId: result._id,
             token
-          }
-        })
-        await mongo.findOneAndDelete('cert', {
-          filter: {
-            publicKey
           }
         })
         ctx.body = {
@@ -111,8 +106,8 @@ class accountController extends Controller {
     const mongo = app.mongo.get('oj')
     let { username, password, trueName, sex, school, email, editable, userId, publicKey } = ctx.request.body
     try {
-      const value = await mongo.findOne('cert', {
-        query: {
+      const { value } = await mongo.findOneAndDelete('cert', {
+        filter: {
           publicKey
         }
       })

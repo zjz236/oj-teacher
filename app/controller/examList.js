@@ -49,16 +49,12 @@ class examListController extends Controller {
   }
 
   async deleteExam() {
-    const { ctx, app } = this
+    const { ctx } = this
     try {
       const { examId } = ctx.request.query
-      const mongo = app.mongo.get('oj')
-      const { value } = await mongo.findOneAndDelete('examList', {
-        filter: {
-          _id: ObjectID(examId)
-        }
-      })
-      if (value) {
+      const { deleteExam } = ctx.helper.deleteUtil
+      const result = await deleteExam({ examId })
+      if (result) {
         ctx.body = {
           code: 1,
           msg: 'success'
