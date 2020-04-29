@@ -310,12 +310,6 @@ module.exports = app => {
               $inc: { num: -1 }
             }
           })
-          if (isIDE) {
-            deleteFile(inputFile)
-              .catch(e => e)
-            deleteFile(outputFile)
-              .catch(e => e)
-          }
           setTimeout(() => runner(), 500)
           return
         }
@@ -368,6 +362,12 @@ module.exports = app => {
           default:
             fs.unlinkSync(filePath + fileName + '.py')
             break
+        }
+        if (isIDE) {
+          deleteFile(inputFile)
+            .catch(e => e)
+          deleteFile(outputFile)
+            .catch(e => e)
         }
         if (process.env.NODE_ENV === 'development') {
           child.stdout = '{\'memoryused\': 10916L, \'timeused\': 1000L, \'result\': 0L}\n'
