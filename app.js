@@ -346,7 +346,7 @@ module.exports = app => {
             testShell = `python3,${filePath + fileName}.py`
             break
         }
-        const child = shell.exec(`python3 ${path.join(__dirname, './app/source/test.py')} ${testShell} ${inputFile} outputData/${fileName}.out`, {
+        const child = shell.exec(`python ${path.join(__dirname, './app/source/test.py')} ${testShell} ${inputFile} outputData/${fileName}.out`, {
           silent: true,
           timeout: 10000
         })
