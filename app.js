@@ -369,7 +369,9 @@ module.exports = app => {
             fs.unlinkSync(filePath + fileName + '.py')
             break
         }
-        child.stdout = '{\'memoryused\': 10916L, \'timeused\': 1000L, \'result\': 0L}\n'
+        if (process.env.NODE_ENV === 'development') {
+          child.stdout = '{\'memoryused\': 10916L, \'timeused\': 1000L, \'result\': 0L}\n'
+        }
         if (!child.stdout) {
           await mongo.findOneAndUpdate('processStatus', {
             filter: {
