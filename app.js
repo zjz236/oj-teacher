@@ -346,7 +346,7 @@ module.exports = app => {
             testShell = `python3,${filePath + fileName}.py`
             break
         }
-        const child = shell.exec(`python ${path.join(__dirname, './app/source/test.py')} ${testShell} ${inputFile} outputData/${fileName}.out`, {
+        const child = shell.exec(`python3 ${path.join(__dirname, './app/source/test.py')} ${testShell} ${inputFile} outputData/${fileName}.out`, {
           silent: true,
           timeout: 10000
         })
@@ -379,6 +379,17 @@ module.exports = app => {
             },
             update: {
               $inc: { num: -1 }
+            }
+          })
+          await mongo.findOneAndUpdate('processResult', {
+            filter: {
+              _id: value._id
+            },
+            update: {
+              $set: {
+                status: 'Compile',
+                e: child
+              }
             }
           })
           if (isIDE) {
