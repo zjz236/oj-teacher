@@ -5,48 +5,27 @@ name: Node.js CI
 
 on:
   push:
-    branches: master
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
 jobs:
   build:
 
-    runs-on: ubuntu-16.04
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        node-version: [10.x]
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
-      - uses: actions/checkout@v1
-        with:
-          fetch-depth: 1
-
-      - name: Use Node.js 12.x
-        uses: actions/setup-node@v1
-        with:
-          node-version: '12.x'
-
-      # step2: 将源码复制到服务器 #坑
-      - name: Deploy to Server
-        uses: easingthemes/ssh-deploy@v2.1.2
-        env:
-          # 这个地方的用法会在下面解释，简单的说就是一个变量
-          # 为了安全，被写在一个其他的地方
-          SSH_PRIVATE_KEY: ${{ secrets.TOKEN }}
-          REMOTE_HOST: ${{ secrets.HOST }}
-          REMOTE_USER: ${{ secrets.USER }}
-          SOURCE: ''
-          TARGET: '/var/www/source/oj-teacher/'
-          ARGS: '-avzr --delete'
-
-
-      # step3: 通过ssh连接服务器，执行安装和启动服务
-      # 其实可以在github提供的虚拟机里面完成代码的打包
-      # 但是node_modules太大了，我的服务及带宽太小，传输速度太慢了
-      - name: start server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.TOKEN }}
-          script: |
-            cd /var/www/source/oj-teacher/
-            ~/.nvm/versions/node/v12.16.1/bin/cnpm install
-            ~/.nvm/versions/node/v12.16.1/bin/npm stop
-            ~/.nvm/versions/node/v12.16.1/bin/npm start
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm i -g npminstall && npminstall
+    - run: npm run ci
+      env:
+        CI: true

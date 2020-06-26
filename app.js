@@ -237,7 +237,7 @@ module.exports = app => {
         const runnerResult = await vm.run(`new Promise(resolve => {
           const child = shell.exec(runShell, {
             async: true,
-            timeout: 10000,
+            timeout: 3000,
             cwd: filePath,
             silent: true
           })
