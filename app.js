@@ -2,8 +2,8 @@
 const fs = require('fs')
 const shell = require('shelljs')
 const path = require('path')
-const { VM } = require('vm2')
-const { getRandomNumber } = require('./app/util/languageCommon')
+const {VM} = require('vm2')
+const {getRandomNumber} = require('./app/util/languageCommon')
 
 const deleteFile = fileName => {
   return new Promise((resolve, reject) => {
@@ -34,26 +34,9 @@ module.exports = app => {
     setTimeout(() => runner(), 30)
 
     async function runner() {
-      const pause = await mongo.findOne('processStatus', {})
       let resultId = ''
       try {
-        if (!pause.status) {
-          setTimeout(() => runner(), 500)
-          return
-        }
-        if (!pause.num >= 4) {
-          setTimeout(() => runner(), 500)
-          return
-        }
-        await mongo.findOneAndUpdate('processStatus', {
-          filter: {
-            _id: pause._id
-          },
-          update: {
-            $inc: { num: 1 }
-          }
-        })
-        const { value } = await mongo.findOneAndUpdate('processResult', {
+        const {value} = await mongo.findOneAndUpdate('processResult', {
           filter: {
             status: 'Queuing'
           },
@@ -69,19 +52,11 @@ module.exports = app => {
           }
         })
         if (!value) {
-          await mongo.findOneAndUpdate('processStatus', {
-            filter: {
-              _id: pause._id
-            },
-            update: {
-              $inc: { num: -1 }
-            }
-          })
           setTimeout(() => runner(), 500)
           return
         }
         resultId = value._id
-        const { code, inputFile, outputFile, language, isIDE, timeLimit, memoryLimit } = value
+        const {code, inputFile, outputFile, language, isIDE, timeLimit, memoryLimit} = value
         const fileName = getRandomNumber()
         let filePath
         if (language === 'c') {
@@ -107,20 +82,6 @@ module.exports = app => {
                 }
               }
             })
-            await mongo.findOneAndUpdate('processStatus', {
-              filter: {
-                _id: pause._id
-              },
-              update: {
-                $inc: { num: -1 }
-              }
-            })
-            if (isIDE) {
-              deleteFile(inputFile)
-                .catch(e => e)
-              deleteFile(outputFile)
-                .catch(e => e)
-            }
             setTimeout(() => runner(), 500)
             return
           }
@@ -146,20 +107,6 @@ module.exports = app => {
                 }
               }
             })
-            await mongo.findOneAndUpdate('processStatus', {
-              filter: {
-                _id: pause._id
-              },
-              update: {
-                $inc: { num: -1 }
-              }
-            })
-            if (isIDE) {
-              deleteFile(inputFile)
-                .catch(e => e)
-              deleteFile(outputFile)
-                .catch(e => e)
-            }
             setTimeout(() => runner(), 500)
             return
           }
@@ -184,20 +131,6 @@ module.exports = app => {
                 }
               }
             })
-            await mongo.findOneAndUpdate('processStatus', {
-              filter: {
-                _id: pause._id
-              },
-              update: {
-                $inc: { num: -1 }
-              }
-            })
-            if (isIDE) {
-              deleteFile(inputFile)
-                .catch(e => e)
-              deleteFile(outputFile)
-                .catch(e => e)
-            }
             setTimeout(() => runner(), 500)
             return
           }
@@ -302,20 +235,6 @@ module.exports = app => {
               }
             }
           })
-          await mongo.findOneAndUpdate('processStatus', {
-            filter: {
-              _id: pause._id
-            },
-            update: {
-              $inc: { num: -1 }
-            }
-          })
-          if (isIDE) {
-            deleteFile(inputFile)
-              .catch(e => e)
-            deleteFile(outputFile)
-              .catch(e => e)
-          }
           setTimeout(() => runner(), 500)
           return
         }
@@ -373,14 +292,6 @@ module.exports = app => {
           child.stdout = '{\'memoryused\': 10916L, \'timeused\': 1000L, \'result\': 0L}\n'
         }
         if (!child.stdout) {
-          await mongo.findOneAndUpdate('processStatus', {
-            filter: {
-              _id: pause._id
-            },
-            update: {
-              $inc: { num: -1 }
-            }
-          })
           await mongo.findOneAndUpdate('processResult', {
             filter: {
               _id: value._id
@@ -392,12 +303,6 @@ module.exports = app => {
               }
             }
           })
-          if (isIDE) {
-            deleteFile(inputFile)
-              .catch(e => e)
-            deleteFile(outputFile)
-              .catch(e => e)
-          }
           setTimeout(() => runner(), 500)
           return
         }
@@ -406,84 +311,24 @@ module.exports = app => {
             .replace(new RegExp('L', 'g'), '')
             .replace(new RegExp('\'', 'g'), '"')
           const result = JSON.parse(str)
-          if (isIDE) {
-            await mongo.findOneAndUpdate('processResult', {
-              filter: {
-                _id: value._id
-              },
-              update: {
-                $set: {
-                  timeUsed: result.timeused,
-                  memoryUsed: result.memoryused,
-                  status: 'Compile'
-                }
-              }
-            })
-            deleteFile(inputFile)
-              .catch(e => e)
-            deleteFile(outputFile)
-              .catch(e => e)
-          } else {
-            const output = fs.readFileSync(path.join(__dirname, './app/public/' + outputFile))
-              .toString()
-            if (output !== runnerResult.output) {
-              if (output.replace(/[\r\n]/g, '')
-                .replace(/\ +/g, '') !== runnerResult.output.replace(/[\r\n]/g, '')
-                .replace(/\ +/g, '')) {
-                await mongo.findOneAndUpdate('processResult', {
-                  filter: {
-                    _id: value._id
-                  },
-                  update: {
-                    $set: {
-                      timeUsed: result.timeused,
-                      memoryUsed: result.memoryused,
-                      status: 'Wrong Answer'
-                    }
+          const output = fs.readFileSync(path.join(__dirname, './app/public/' + outputFile))
+            .toString()
+          if (output !== runnerResult.output) {
+            if (output.replace(/[\r\n]/g, '')
+              .replace(/\ +/g, '') !== runnerResult.output.replace(/[\r\n]/g, '')
+              .replace(/\ +/g, '')) {
+              await mongo.findOneAndUpdate('processResult', {
+                filter: {
+                  _id: value._id
+                },
+                update: {
+                  $set: {
+                    timeUsed: result.timeused,
+                    memoryUsed: result.memoryused,
+                    status: 'Wrong Answer'
                   }
-                })
-              } else {
-                if (result.timeused > timeLimit) {
-                  await mongo.findOneAndUpdate('processResult', {
-                    filter: {
-                      _id: value._id
-                    },
-                    update: {
-                      $set: {
-                        timeUsed: timeLimit,
-                        memoryUsed: result.memoryused,
-                        status: 'Time Limit Exceeded'
-                      }
-                    }
-                  })
-                } else if (result.memoryused > memoryLimit) {
-                  await mongo.findOneAndUpdate('processResult', {
-                    filter: {
-                      _id: value._id
-                    },
-                    update: {
-                      $set: {
-                        timeUsed: result.timeused,
-                        memoryUsed: memoryLimit,
-                        status: 'Memory Limit Exceeded'
-                      }
-                    }
-                  })
-                } else {
-                  await mongo.findOneAndUpdate('processResult', {
-                    filter: {
-                      _id: value._id
-                    },
-                    update: {
-                      $set: {
-                        timeUsed: result.timeused,
-                        memoryUsed: result.memoryused,
-                        status: 'Presentation Error'
-                      }
-                    }
-                  })
                 }
-              }
+              })
             } else {
               if (result.timeused > timeLimit) {
                 await mongo.findOneAndUpdate('processResult', {
@@ -520,21 +365,55 @@ module.exports = app => {
                     $set: {
                       timeUsed: result.timeused,
                       memoryUsed: result.memoryused,
-                      status: 'Accepted'
+                      status: 'Presentation Error'
                     }
                   }
                 })
               }
             }
-          }
-          await mongo.findOneAndUpdate('processStatus', {
-            filter: {
-              _id: pause._id
-            },
-            update: {
-              $inc: { num: -1 }
+          } else {
+            if (result.timeused > timeLimit) {
+              await mongo.findOneAndUpdate('processResult', {
+                filter: {
+                  _id: value._id
+                },
+                update: {
+                  $set: {
+                    timeUsed: timeLimit,
+                    memoryUsed: result.memoryused,
+                    status: 'Time Limit Exceeded'
+                  }
+                }
+              })
+            } else if (result.memoryused > memoryLimit) {
+              await mongo.findOneAndUpdate('processResult', {
+                filter: {
+                  _id: value._id
+                },
+                update: {
+                  $set: {
+                    timeUsed: result.timeused,
+                    memoryUsed: memoryLimit,
+                    status: 'Memory Limit Exceeded'
+                  }
+                }
+              })
+            } else {
+              await mongo.findOneAndUpdate('processResult', {
+                filter: {
+                  _id: value._id
+                },
+                update: {
+                  $set: {
+                    timeUsed: result.timeused,
+                    memoryUsed: result.memoryused,
+                    status: 'Accepted'
+                  }
+                }
+              })
             }
-          })
+          }
+
           setTimeout(() => runner(), 500)
         }
       } catch (e) {
@@ -548,14 +427,6 @@ module.exports = app => {
               status: 'Service Error',
               e
             }
-          }
-        })
-        await mongo.findOneAndUpdate('processStatus', {
-          filter: {
-            _id: pause._id
-          },
-          update: {
-            $inc: { num: -1 }
           }
         })
         setTimeout(() => runner(), 500)
