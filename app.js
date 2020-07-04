@@ -34,25 +34,8 @@ module.exports = app => {
     setTimeout(() => runner(), 30)
 
     async function runner() {
-      const pause = await mongo.findOne('processStatus', {})
       let resultId = ''
       try {
-        if (!pause.status) {
-          setTimeout(() => runner(), 500)
-          return
-        }
-        if (!pause.num >= 4) {
-          setTimeout(() => runner(), 500)
-          return
-        }
-        await mongo.findOneAndUpdate('processStatus', {
-          filter: {
-            _id: pause._id
-          },
-          update: {
-            $inc: { num: 1 }
-          }
-        })
         const { value } = await mongo.findOneAndUpdate('processResult', {
           filter: {
             status: 'Queuing'
@@ -69,14 +52,6 @@ module.exports = app => {
           }
         })
         if (!value) {
-          await mongo.findOneAndUpdate('processStatus', {
-            filter: {
-              _id: pause._id
-            },
-            update: {
-              $inc: { num: -1 }
-            }
-          })
           setTimeout(() => runner(), 500)
           return
         }
@@ -105,14 +80,6 @@ module.exports = app => {
                   errMsg: error,
                   status: 'Compile Error'
                 }
-              }
-            })
-            await mongo.findOneAndUpdate('processStatus', {
-              filter: {
-                _id: pause._id
-              },
-              update: {
-                $inc: { num: -1 }
               }
             })
             if (isIDE) {
@@ -146,14 +113,6 @@ module.exports = app => {
                 }
               }
             })
-            await mongo.findOneAndUpdate('processStatus', {
-              filter: {
-                _id: pause._id
-              },
-              update: {
-                $inc: { num: -1 }
-              }
-            })
             if (isIDE) {
               deleteFile(inputFile)
                 .catch(e => e)
@@ -182,14 +141,6 @@ module.exports = app => {
                   errMsg: error,
                   status: 'Compile Error'
                 }
-              }
-            })
-            await mongo.findOneAndUpdate('processStatus', {
-              filter: {
-                _id: pause._id
-              },
-              update: {
-                $inc: { num: -1 }
               }
             })
             if (isIDE) {
@@ -302,14 +253,6 @@ module.exports = app => {
               }
             }
           })
-          await mongo.findOneAndUpdate('processStatus', {
-            filter: {
-              _id: pause._id
-            },
-            update: {
-              $inc: { num: -1 }
-            }
-          })
           if (isIDE) {
             deleteFile(inputFile)
               .catch(e => e)
@@ -373,14 +316,6 @@ module.exports = app => {
           child.stdout = '{\'memoryused\': 10916L, \'timeused\': 1000L, \'result\': 0L}\n'
         }
         if (!child.stdout) {
-          await mongo.findOneAndUpdate('processStatus', {
-            filter: {
-              _id: pause._id
-            },
-            update: {
-              $inc: { num: -1 }
-            }
-          })
           await mongo.findOneAndUpdate('processResult', {
             filter: {
               _id: value._id
@@ -527,14 +462,6 @@ module.exports = app => {
               }
             }
           }
-          await mongo.findOneAndUpdate('processStatus', {
-            filter: {
-              _id: pause._id
-            },
-            update: {
-              $inc: { num: -1 }
-            }
-          })
           setTimeout(() => runner(), 500)
         }
       } catch (e) {
@@ -548,14 +475,6 @@ module.exports = app => {
               status: 'Service Error',
               e
             }
-          }
-        })
-        await mongo.findOneAndUpdate('processStatus', {
-          filter: {
-            _id: pause._id
-          },
-          update: {
-            $inc: { num: -1 }
           }
         })
         setTimeout(() => runner(), 500)
